@@ -1,0 +1,251 @@
+#!/usr/bin/env ruby
+# pubdomo: generate a list of publications (in YAML) from a bibtex file.
+# Intermediate CSL files are used to generate each entry's attributes
+# (authors, title, venue and details).
+#
+# related gems:
+# https://github.com/inukshuk/bibtex-ruby
+# https://github.com/inukshuk/citeproc-ruby
+
+require 'bibtex'
+require 'citeproc'
+require 'optparse'
+
+def main
+  $options = {}
+  parse_options!($options)
+
+  $styles = {
+    'authors' =>	"#{$options[:styles]}/authors.csl",
+    'title' =>		"#{$options[:styles]}/title.csl",
+    'venue' =>		"#{$options[:styles]}/venue.csl",
+    'details' =>	"#{$options[:styles]}/details.csl",
+  }
+
+  bib = open_bib(ARGV[0])
+
+  case $options[:sort]
+  when :year
+    gen_yaml_by_year(bib)
+  else
+    gen_yaml_by_symbol(bib, $options[:sort])
+  end
+
+end
+
+def open_bib(bib_file)
+  bib = BibTeX.open(bib_file)
+  # replace all string-elements in the bib with the original full length string
+  bib.each do |obj|
+    obj.replace(bib.q('@string'))
+  end
+  # removes the string elements
+  bib.delete('@string')
+
+  # sort data by year and month
+  months = {
+    'jan' => 1,
+    'feb' => 2,
+    'mar' => 3,
+    'apr' => 4,
+    'may' => 5,
+    'jun' => 6,
+    'jul' => 7,
+    'aug' => 8,
+    'sep' => 9,
+    'oct' => 10,
+    'nov' => 11,
+    'dec' => 12,
+  }
+  bib.data.each do |entry|
+    entry.convert!(:latex)
+    if (entry.respond_to?("month"))
+      entry.mon = months[entry.month.to_str]
+    else
+      entry.mon = 0
+    end
+  end
+  bib.data.sort_by!{|a| [ a.year.to_i, a.mon.to_i ]}.reverse!
+end
+
+def gen_yaml_by_symbol(bib, symbol)
+  vector = []
+  # hash of arrays: classification->array_papers
+  symbols = Hash.new
+  # hash ref->real name used to improve printing
+  full_titles = Hash.new
+  # fields read from the bib file
+  bibfield = "#{symbol}"
+
+  # classify the papers by :symbol
+  bib.each do |entry|
+    # get the requested string
+    if entry.content.index(bibfield)
+      line = entry.send(symbol.to_sym)
+      # check for empty values, e.g. subject = " "
+      if line.gsub(/ +?/,'') == ""
+        line = "emptyfield"
+      end
+      # the keywords string can have multiple entries separated by a comma
+      vector = line.split(/, /)
+    else
+      # in case of missing field, use a default value
+      tmp = "(ungrouped)"
+      vector = tmp.split(/, /)
+    end
+
+    vector.each do |name|
+      name.downcase!
+      ref = name.gsub(/ +?/,'_')
+
+      full_titles[ref] = name
+      (symbols[ref] ||= []) << entry
+    end
+  end
+
+  # generate submenu
+  puts "subsubmenu:"
+  full_titles.sort.each do |k, v|
+    puts "  - ref: \"##{k}\""
+    puts "    text: #{v}"
+  end
+
+  puts "publications:"
+  # print the papers by topic
+  full_titles.sort.each do |k, title|
+    # sort each topic set by year
+    publications = symbols[k]
+
+    # print the specific topic
+    print_yaml_symbol(k, publications, full_titles)
+  end
+end
+
+def print_yaml_symbol(topic, array, full_titles)
+  tab = "  "
+  tab2 = tab + "  "
+  tab3 = tab2 + "  "
+
+  line = tab + "- level_1: " + full_titles[topic]
+  puts(line)
+  line = tab + "  ref: "   + topic
+  puts(line)
+  line = tab + "  papers:"
+  puts(line)
+
+  array.each do |entry|
+    entry.convert!(:latex)
+    print_entry(entry);
+  end
+end
+
+def print_entry(entry)
+  tab = "  "
+  tab2 = tab + "  "
+  tab3 = tab2 + "  "
+  tab4 = tab3 + "  "
+
+  puts(tab2 + "- entry:")
+  puts(tab3 + "authors: " +
+       CiteProc.process(entry.to_citeproc, :style => $styles['authors']).inspect)
+  puts(tab3 + "title: " +
+       CiteProc.process(entry.to_citeproc, :style => $styles['title']).inspect)
+  puts(tab3 + "venue: " +
+       CiteProc.process(entry.to_citeproc, :style => $styles['venue']).inspect)
+  puts(tab3 + "details: " +
+       CiteProc.process(entry.to_citeproc, :style => $styles['details']).inspect)
+
+  if (entry.year)
+    puts(tab3 + "year: " + entry.year)
+  end
+  if (entry.content.index("month") )
+    puts(tab3 + "month: " + entry.month)
+  end
+  puts(tab3 + "mon: " + entry.mon)
+  if (entry.content.index("keywords"))
+    puts(tab3 + "keywords: " + entry.keywords.to_s)
+  end
+
+  if (entry.respond_to?("note"))
+    puts(tab3 + "note: " + entry.note)
+  end
+
+  # allow several extensions: e.g. we could have a paper and slides
+  extensions = ["pdf", "ps", "ps.gz", "html", "txt", "ppt", "odt"]
+  extensions.each do |ext|
+    if File.exist?($options[:pubs] + "/" + entry.key + "." + ext)
+      line = tab3 + ext + ": " + entry.key + "." + ext
+      puts(line)
+    end
+  end
+end
+
+def gen_yaml_by_year(bib)
+  tab = "  "
+  tab2 = tab + "  "
+  tab3 = tab2 + "  "
+
+  # build subsubmenu
+  puts "subsubmenu:"
+  pub = {}
+  bib.each do |entry|
+    (pub[entry.year.to_s] ||= []) << entry
+  end
+
+  pub.sort.reverse.each do |k, v|
+    puts tab + "- ref: \"##{k}\""
+    puts tab + "  text: #{k}"
+  end
+
+  puts "publications:"
+
+  pub.sort.reverse.each do |k, v|
+    puts(tab + "- level_1: " + k)
+    puts(tab + "  ref: "   + k)
+    puts(tab + "  papers:")
+
+    v.each do |entry|
+      entry.convert!(:latex)
+      print_entry(entry)
+    end
+  end
+
+end
+
+def parse_options!(options)
+  optparse = OptionParser.new do |opts|
+    opts.banner = "Usage: pubdomo [options] file.bib"
+
+    options[:sort] = 'year'
+    opts.on('--sort [TYPE]', [:year, :keywords, :project, :subject],
+            "Sort output by year/keywords/project/subject.") do |t|
+      options[:sort] = t
+    end
+
+    options[:pubs] = './pubs'
+    opts.on('--pubs DIR', 'pubs directory (Default: ./pubs).') do |t|
+      options[:pubs] = t
+    end
+
+    options[:styles] = 'styles'
+    opts.on('--styles DIR', 'CSL styles directory (Default: ./styles).') do |t|
+      options[:styles] = t
+    end
+
+    opts.on( '-h', '--help', 'Display this screen' ) do
+      puts opts
+      exit
+    end
+  end
+
+  optparse.parse!
+
+  if ARGV.length != 1
+    puts "Usage: pubdomo [options] bibfile.bib"
+    exit
+  end
+
+  options
+end
+
+main
