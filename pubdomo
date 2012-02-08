@@ -24,6 +24,11 @@ def main
 
   bib = open_bib(ARGV[0])
 
+  if $options[:splitbib]
+      gen_bib_files(bib)
+  end
+
+  sort_bib(bib)
   case $options[:sort]
   when :year
     gen_yaml_by_year(bib)
@@ -41,8 +46,11 @@ def open_bib(bib_file)
   end
   # removes the string elements
   bib.delete('@string')
+  return bib
+end
 
-  # sort data by year and month
+# sort data by year and month
+def sort_bib(bib)
   months = {
     'jan' => 1,
     'feb' => 2,
@@ -178,6 +186,25 @@ def print_entry(entry)
       puts(line)
     end
   end
+
+  # add bib file ref
+  if File.exist?($options[:bibs] + "/" + entry.key + ".bib")
+    line = tab3 + "bib: " + entry.key + ".bib"
+    puts(line)
+  end
+end
+
+def gen_bib_files(bib)
+
+  if !FileTest::directory?($options[:bibs])
+    Dir::mkdir($options[:bibs])
+  end
+
+  bib.each do |entry|
+    File.open($options[:bibs] + "/" + entry.key + ".bib", 'w') {
+      |f| f.puts(entry)
+    }
+  end
 end
 
 def gen_yaml_by_year(bib)
@@ -230,6 +257,15 @@ def parse_options!(options)
     options[:styles] = 'styles'
     opts.on('--styles DIR', 'CSL styles directory (Default: ./styles).') do |t|
       options[:styles] = t
+    end
+
+    options[:bibs] = './bibs'
+    opts.on('--bibs DIR', '.bib files directory (Default: ./bibs).') do |t|
+      options[:bibs] = t
+    end
+
+    opts.on('--splitbib', 'Generate per-pub bib file (Dest: --bibs).') do |t|
+        options[:splitbib] = t
     end
 
     opts.on( '-h', '--help', 'Display this screen' ) do
