@@ -11,7 +11,10 @@ require 'bibtex'
 require 'citeproc'
 require 'optparse'
 
-def main
+def main         
+  
+  # This hash will hold all of the options parsed from the command-line by
+  # OptionParser.
   $options = {}
   parse_options!($options)
 
@@ -24,10 +27,17 @@ def main
 
   bib = open_bib(ARGV[0])
 
+  if $options[:splitbib] !=false
+      gen_bib_files(bib)        
+      return
+  end                 
+    
+
+  # call different function according to the chosen --sort flag
   case $options[:sort]
-  when :year
+  when :year 
     gen_yaml_by_year(bib)
-  else
+  else      
     gen_yaml_by_symbol(bib, $options[:sort])
   end
 
@@ -148,8 +158,10 @@ def print_entry(entry)
   puts(tab2 + "- entry:")
   puts(tab3 + "authors: " +
        CiteProc.process(entry.to_citeproc, :style => $styles['authors']).inspect)
+       
   puts(tab3 + "title: " +
        CiteProc.process(entry.to_citeproc, :style => $styles['title']).inspect)
+
   puts(tab3 + "venue: " +
        CiteProc.process(entry.to_citeproc, :style => $styles['venue']).inspect)
   puts(tab3 + "details: " +
@@ -178,7 +190,30 @@ def print_entry(entry)
       puts(line)
     end
   end
+  # add bib file ref
+  if File.exist?($options[:bibs] + "/" + entry.key + ".bib")
+    line = tab3 + "bib" + ": " + entry.key + ".bib"
+    puts(line)
+  end
+  
 end
+
+
+def gen_bib_files(bib)
+
+  if !FileTest::directory?("#{$options[:bibs]}")
+    Dir::mkdir("#{$options[:bibs]}")
+  end
+
+  bib.each do |entry|      
+    File.open( "#{$options[:bibs]}" + "/" + entry.key + ".bib", 'w') {
+      |f| f.puts(entry) 
+    }
+    # print "printing entry -> " + "#{$options[:bibs]}" + "/" + entry.key + ".bib" +"\n"
+  end
+
+ 
+end                      
 
 def gen_yaml_by_year(bib)
   tab = "  "
@@ -213,11 +248,16 @@ def gen_yaml_by_year(bib)
 end
 
 def parse_options!(options)
-  optparse = OptionParser.new do |opts|
+
+    optparse = OptionParser.new do |opts|
+
     opts.banner = "Usage: pubdomo [options] file.bib"
 
+
+    #set the default value
     options[:sort] = 'year'
-    opts.on('--sort [TYPE]', [:year, :keywords, :project, :subject],
+    # define option valid only on a set of arguments
+    opts.on('--sort [TYPE]', [:year, :keywords, :project],
             "Sort output by year/keywords/project/subject.") do |t|
       options[:sort] = t
     end
@@ -232,6 +272,20 @@ def parse_options!(options)
       options[:styles] = t
     end
 
+    options[:bibs] = './bibs'
+    opts.on('--bibs DIR', '.bib files  directory (Default: ./bibs).') do |t|
+      options[:bibs] = t
+    end
+    
+
+    options[:splitbib] = false
+    opts.on('--splitbib', 'Split file.bib into multiple files stored into --bibs folder.') do 
+        options[:splitbib] = true  
+
+    end
+
+    # This displays the help screen, all programs are
+    # assumed to have this option.
     opts.on( '-h', '--help', 'Display this screen' ) do
       puts opts
       exit
@@ -241,7 +295,7 @@ def parse_options!(options)
   optparse.parse!
 
   if ARGV.length != 1
-    puts "Usage: pubdomo [options] bibfile.bib"
+    puts "Usage: pubdomo [options] bibfile.bib " 
     exit
   end
 
