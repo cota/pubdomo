@@ -1,11 +1,13 @@
 # pubdomo
 ### the stupid assistant for displaying bibliographies
 
-    Usage: pubdomo [options] file.bib
-        --sort [TYPE]         Sort output by year/keywords/project/subject.
-        --pubs DIR            pubs directory (Default: ./pubs).
-        --styles DIR          CSL styles directory (Default: ./styles).
-        -h, --help            Display this screen
+Usage: pubdomo [options] file.bib
+        --sort [TYPE]                Sort output by year/keywords/project/subject.
+        --pubs DIR                   pubs directory (Default: ./pubs).
+        --styles DIR                 CSL styles directory (Default: ./styles).
+        --bibs DIR                   .bib files directory (Default: ./bibs).
+        --splitbib                   Generate per-pub bib file (Dest: --bibs).
+    -h, --help                       Display this screen
 
 ## main purpose
 To take a list of publications (in BibTeX format), and thanks to
@@ -52,8 +54,9 @@ Output:
 		  keywords: networks-on-chip, photonics, optical communication
 		  note: (Best paper award)
 		  pdf: bergman_hpec07.pdf
+		  bib: bergman_hpec07.bib
 
-NB. Of course `$pubs/bergman_hpec07.pdf` exists.
+NB. Of course `$pubs/bergman_hpec07.pdf` and $bibs/bergman_hpec07.bib exist.
 
 ## sorting
 Apart from the explicit sorting, second-level sorting is done by publication
