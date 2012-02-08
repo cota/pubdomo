@@ -277,10 +277,11 @@ def parse_options!(options)
       options[:bibs] = t
     end
     
+
     options[:splitbib] = false
-    opts.on('--splitbib DIR ', 'trigger the generation of the  bib files, one for each entry (Default: ./bibs).') do |t|
+    opts.on('--splitbib', 'trigger the generation of the  bib files in --bibs folder.') do 
         options[:splitbib] = true  
-        options[:bibs] = t || "./bibs"
+
     end
 
     # This displays the help screen, all programs are
