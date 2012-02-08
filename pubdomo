@@ -279,7 +279,7 @@ def parse_options!(options)
     
 
     options[:splitbib] = false
-    opts.on('--splitbib', 'trigger the generation of the  bib files in --bibs folder.') do 
+    opts.on('--splitbib', 'Split file.bib into multiple files stored into --bibs folder.') do 
         options[:splitbib] = true  
 
     end
