@@ -152,16 +152,17 @@ def print_entry(entry)
   tab2 = tab + "  "
   tab3 = tab2 + "  "
   tab4 = tab3 + "  "
+  format = $options[:html] ? :html : :default
 
   puts(tab2 + "- entry:")
   puts(tab3 + "authors: " +
-       CiteProc.process(entry.to_citeproc, :style => $styles['authors']).inspect)
+       CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['authors']).inspect)
   puts(tab3 + "title: " +
-       CiteProc.process(entry.to_citeproc, :style => $styles['title']).inspect)
+       CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['title']).inspect)
   puts(tab3 + "venue: " +
-       CiteProc.process(entry.to_citeproc, :style => $styles['venue']).inspect)
+       CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['venue']).inspect)
   puts(tab3 + "details: " +
-       CiteProc.process(entry.to_citeproc, :style => $styles['details']).inspect)
+       CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['details']).inspect)
 
   if (entry.year)
     puts(tab3 + "year: " + entry.year)
@@ -266,6 +267,10 @@ def parse_options!(options)
 
     opts.on('--splitbib', 'Generate per-pub bib file (Dest: --bibs).') do |t|
         options[:splitbib] = t
+    end
+
+    opts.on('--html', 'Embed HTML in the generated entries.') do |t|
+        options[:html] = t
     end
 
     opts.on( '-h', '--help', 'Display this screen' ) do

@@ -7,6 +7,7 @@ Usage: pubdomo [options] file.bib
         --styles DIR                 CSL styles directory (Default: ./styles).
         --bibs DIR                   .bib files directory (Default: ./bibs).
         --splitbib                   Generate per-pub bib file (Dest: --bibs).
+        --html                       Embed HTML in the generated entries.
     -h, --help                       Display this screen
 
 ## main purpose
