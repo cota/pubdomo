@@ -1,14 +1,14 @@
 # pubdomo
 ### the stupid assistant for displaying bibliographies
 
-Usage: pubdomo [options] file.bib
-        --sort [TYPE]                Sort output by year/keywords/project/subject.
-        --pubs DIR                   pubs directory (Default: ./pubs).
-        --styles DIR                 CSL styles directory (Default: ./styles).
-        --bibs DIR                   .bib files directory (Default: ./bibs).
-        --splitbib                   Generate per-pub bib file (Dest: --bibs).
-        --html                       Embed HTML in the generated entries.
-    -h, --help                       Display this screen
+	Usage: pubdomo [options] file.bib
+	        --sort [TYPE]                Sort output by year/keywords/project/subject.
+	        --pubs DIR                   pubs directory (Default: ./pubs).
+	        --styles DIR                 CSL styles directory (Default: ./styles).
+	        --bibs DIR                   .bib files directory (Default: ./bibs).
+	        --splitbib                   Generate per-pub bib file (Dest: --bibs).
+	        --html                       Embed HTML in the generated entries.
+	    -h, --help                       Display this screen
 
 ## main purpose
 To take a list of publications (in BibTeX format), and thanks to
