@@ -57,7 +57,8 @@ Output:
 		  pdf: bergman_hpec07.pdf
 		  bib: bergman_hpec07.bib
 
-NB. Of course `$pubs/bergman_hpec07.pdf` and $bibs/bergman_hpec07.bib exist.
+NB. Of course `$pubs/bergman_hpec07.pdf` must previously exist;
+`$bibs/bergman_hpec07.bib` is generated with the `--splitbib` option.
 
 ## sorting
 Apart from the explicit sorting, second-level sorting is done by publication
