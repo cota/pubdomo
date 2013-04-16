@@ -107,7 +107,9 @@ def gen_yaml_by_symbol(bib, symbol)
     end
 
     vector.each do |name|
-      name.downcase!
+      if !$options[:nodowncase]
+        name.downcase!
+      end
       ref = name.gsub(/ +?/,'_')
 
       full_titles[ref] = name
@@ -275,6 +277,10 @@ def parse_options!(options)
 
     opts.on('--splitbib', 'Generate per-pub bib file (Dest: --bibs).') do |t|
         options[:splitbib] = t
+    end
+
+    opts.on('--nodowncase', 'Do not downcase keywords.') do |t|
+        options[:nodowncase] = t
     end
 
     opts.on('--html', 'Embed HTML in the generated entries.') do |t|
