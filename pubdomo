@@ -194,9 +194,9 @@ def print_entry(entry)
     puts(tab3 + "year: " + entry.year)
     authors =~ /([^ ]*?)( and|,|"$)/;
     first = $1
-    author_date = "#{first}'#{entry.year}"
+    author_date = "#{first} #{entry.year}"
     while $seen.has_key?(author_date)
-      if author_date =~ /(.*)'[0-9]+([a-z])$/
+      if author_date =~ /(.*) [0-9]+([a-z])$/
         author_date.succ!
       else
         author_date.concat("b")
