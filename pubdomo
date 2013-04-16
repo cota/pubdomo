@@ -181,6 +181,10 @@ def print_entry(entry)
     puts(tab3 + "keywords: " + entry.keywords.to_s)
   end
 
+  if entry.respond_to?("url")
+    puts(tab3 + "url: " + entry.url)
+  end
+
   if (entry.respond_to?("note"))
     puts(tab3 + "note: " + entry.note)
   end
