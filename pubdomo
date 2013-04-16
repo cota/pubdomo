@@ -73,7 +73,11 @@ def sort_bib(bib)
       entry.mon = 0
     end
   end
-  bib.data.sort_by!{|a| [ a.year.to_i, a.mon.to_i ]}.reverse!
+  if $options[:asc]
+    bib.data.sort_by!{|a| [ a.year.to_i, a.mon.to_i ]}
+  else
+    bib.data.sort_by!{|a| [ a.year.to_i, a.mon.to_i ]}.reverse!
+  end
 end
 
 def gen_yaml_by_symbol(bib, symbol)
@@ -248,6 +252,10 @@ def parse_options!(options)
     opts.on('--sort [TYPE]', [:year, :keywords, :project, :subject],
             "Sort output by year/keywords/project/subject.") do |t|
       options[:sort] = t
+    end
+
+    opts.on('--asc', 'Sort in ascending order.') do |t|
+        options[:asc] = t
     end
 
     options[:pubs] = './pubs'
