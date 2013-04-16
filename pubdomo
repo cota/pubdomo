@@ -119,19 +119,36 @@ def gen_yaml_by_symbol(bib, symbol)
 
   # generate submenu
   puts "subsubmenu:"
-  full_titles.sort.each do |k, v|
-    puts "  - ref: \"##{k}\""
-    puts "    text: #{v}"
+  if $options[:keywords]
+    $options[:keywords].each do |k|
+      escaped = full_titles.key(k)
+      if escaped
+        puts "  - ref: \"##{escaped}\""
+        puts "    text: #{k}"
+      end
+    end
+  else
+    full_titles.sort.each do |k, v|
+      puts "  - ref: \"##{k}\""
+      puts "    text: #{v}"
+    end
   end
 
-  puts "publications:"
   # print the papers by topic
-  full_titles.sort.each do |k, title|
-    # sort each topic set by year
-    publications = symbols[k]
-
-    # print the specific topic
-    print_yaml_symbol(k, publications, full_titles)
+  puts "publications:"
+  if $options[:keywords]
+    $options[:keywords].each do |k|
+      escaped = full_titles.key(k)
+      if escaped
+        publications = symbols[escaped]
+        print_yaml_symbol(escaped, publications, full_titles)
+      end
+    end
+  else
+    full_titles.sort.each do |k, title|
+      publications = symbols[k]
+      print_yaml_symbol(k, publications, full_titles)
+    end
   end
 end
 
@@ -285,6 +302,10 @@ def parse_options!(options)
 
     opts.on('--nodowncase', 'Do not downcase keywords.') do |t|
         options[:nodowncase] = t
+    end
+
+    opts.on("--keywords", "--keywords key1,key2,keyN", Array, "Only show certain keywords in the specified order.") do |a|
+      options[:keywords] = a
     end
 
     opts.on('--html', 'Embed HTML in the generated entries.') do |t|
