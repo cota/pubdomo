@@ -170,6 +170,8 @@ def print_yaml_symbol(topic, array, full_titles)
   end
 end
 
+$seen = Hash.new
+
 def print_entry(entry)
   tab = "  "
   tab2 = tab + "  "
@@ -178,8 +180,9 @@ def print_entry(entry)
   format = $options[:html] ? :html : :default
 
   puts(tab2 + "- entry:")
-  puts(tab3 + "authors: " +
-       CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['authors']).inspect)
+  authors = CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['authors']).inspect
+  puts(tab3 + "authors: " + authors)
+
   puts(tab3 + "title: " +
        CiteProc.process(entry.to_citeproc, :format => format, :style => $styles['title']).inspect)
   puts(tab3 + "venue: " +
@@ -189,6 +192,18 @@ def print_entry(entry)
 
   if (entry.year)
     puts(tab3 + "year: " + entry.year)
+    authors =~ /([^ ]*?)( and|,|"$)/;
+    first = $1
+    author_date = "#{first}'#{entry.year}"
+    while $seen.has_key?(author_date)
+      if author_date =~ /(.*)'[0-9]+([a-z])$/
+        author_date.succ!
+      else
+        author_date.concat("b")
+      end
+    end
+    $seen[author_date] = 1
+    puts(tab3 + "author_date: " + author_date)
   end
   if (entry.content.index("month") )
     puts(tab3 + "month: " + entry.month)
