@@ -3,10 +3,13 @@
 
 	Usage: pubdomo [options] file.bib
 	        --sort [TYPE]                Sort output by year/keywords/project/subject.
+	        --asc                        Sort in ascending order.
 	        --pubs DIR                   pubs directory (Default: ./pubs).
 	        --styles DIR                 CSL styles directory (Default: ./styles).
 	        --bibs DIR                   .bib files directory (Default: ./bibs).
 	        --splitbib                   Generate per-pub bib file (Dest: --bibs).
+	        --nodowncase                 Do not downcase keywords.
+	        --keywords key1,key2,keyN    Only show certain keywords in the specified order.
 	        --html                       Embed HTML in the generated entries.
 	    -h, --help                       Display this screen
 
