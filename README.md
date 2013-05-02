@@ -60,6 +60,8 @@ Output:
 NB. Of course `$pubs/bergman_hpec07.pdf` must previously exist;
 `$bibs/bergman_hpec07.bib` is generated with the `--splitbib` option.
 
+For a full example, see [here.](https://github.com/cota/homepage/tree/master/_candidacy)
+
 ## sorting
 Apart from the explicit sorting, second-level sorting is done by publication
 date in descending order (more recent first)--in case two publications have
