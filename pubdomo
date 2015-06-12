@@ -229,6 +229,11 @@ def print_entry(entry)
       puts(line)
     end
   end
+  # also allow foo-slides.pdf
+  if File.exist?($options[:pubs] + "/" + entry.key + "-slides.pdf")
+    line = tab3 + "slides: " + entry.key + "-slides.pdf"
+    puts(line)
+  end
 
   # add bib file ref
   if File.exist?($options[:bibs] + "/" + entry.key + ".bib")
