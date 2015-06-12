@@ -21,8 +21,8 @@ jekyll.
 
 ## dependencies
 - Ruby
-- bibtex-ruby
-- citeproc-ruby (which needs Ruby >= v1.9.2)
+- bibtex-ruby (tested with v2.0.4)
+- citeproc-ruby (tested with v0.0.4, which needs Ruby >= v1.9.2)
 
 ## example
 Input:
