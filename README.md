@@ -1,3 +1,10 @@
+# Warning: Bit rot!
+This script only works with ancient versions of Ruby and citeproc-ruby.
+This won't be fixed, since newer tools have superseded the script,
+e.g. the `jekyll-scholar` Ruby gem.
+
+---
+
 # pubdomo
 ### the stupid assistant for displaying bibliographies
 
